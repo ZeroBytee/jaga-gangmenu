@@ -243,6 +243,7 @@ AddEventHandler('jaga-gangmenu:inVoertuigSteken', function()
             if DoesEntityExist(veh) and IsEntityAVehicle(veh) then
                 --get the network ID of the vehicle && triggers the event if network ID is found
                 local vehicleNetId = NetworkGetNetworkIdFromEntity(veh)
+                local netId = VehToNet(veh)
 
                 -- send's the repairVehicle event, if the networkNetId is found. 
                 if vehicleNetId then
@@ -252,17 +253,12 @@ AddEventHandler('jaga-gangmenu:inVoertuigSteken', function()
                     local seats = GetVehicleMaxNumberOfPassengers(veh)
                     local seatToPutIn = -1  -- Start with an invalid seat index
                 
-                    for i = -1, seats - 1 do
+                    for i = 1, seats - 1, 1 do
                         if IsVehicleSeatFree(veh, i) then
                             seatToPutIn = i  -- Set the seat index to the first available seat
                             break
                         end
                     end
-
-                    local myPed = PlayerPedId()
-                    local newIgnoreList = {myPed}
-
-                    local coords = GetEntityCoords(myPed)
 
                     
                     local targetPlayerId, distance = QBCore.Functions.GetClosestPlayer()
@@ -273,12 +269,12 @@ AddEventHandler('jaga-gangmenu:inVoertuigSteken', function()
                         print(GetPlayerServerId(targetPlayerId))
                     end
 
-                    print("Player ID: " .. targetId .. ", ped: " .. GetPlayerPed(targetId) .. " My ped: "..PlayerPedId().. " veh: " ..veh) -- Add this line for debugging
+                    print("Player ID: " .. targetId .. ", ped: " .. GetPlayerPed(targetId) .. " My ped: "..PlayerPedId().. " veh: " ..netId) -- Add this line for debugging
 
 
                     if targetId ~= -10 then
                         print("in auto server event")
-                        TriggerServerEvent('jaga-gangmenu:server:PutPlayerInVehicle', targetId, veh, seatToPutIn)
+                        TriggerServerEvent('jaga-gangmenu:server:PutPlayerInVehicle', targetId, netId, seatToPutIn)
                         --TaskWarpPedIntoVehicle(PlayerPedId(), veh, seatToPutIn+1)
                     else 
                         print("no player near you!")
@@ -291,12 +287,16 @@ AddEventHandler('jaga-gangmenu:inVoertuigSteken', function()
 end)
 
 RegisterNetEvent('jaga-gangmenu:client:inVoertuigGestoken')
-AddEventHandler('jaga-gangmenu:client:inVoertuigGestoken', function(veh, seat)
+AddEventHandler('jaga-gangmenu:client:inVoertuigGestoken', function(playerId, netId, seat)
+
+    local vehicle = NetToVeh(netId)
 
     print("debug message inVoertuigGestoken" .. " " .. seat)
-    TaskWarpPedIntoVehicle(PlayerPedId(), veh, seat)
+    SetPedIntoVehicle(PlayerPedId(), vehicle, seat)
 
 end)
+
+
 
 
 RegisterNetEvent('jaga-gangmenu:uitVoertuigHalen')
@@ -312,6 +312,7 @@ AddEventHandler('jaga-gangmenu:uitVoertuigHalen', function()
         if jobName == "mechanic" and jobDutyStatus == true then
             --get the vehicle entity
             local veh = getClosestVehicleFromPedPos(PlayerPedId(), 4, 3)
+            local netId = VehToNet(veh)
 
             -- check's if vehicle exist
             if DoesEntityExist(veh) and IsEntityAVehicle(veh) then
@@ -332,7 +333,7 @@ AddEventHandler('jaga-gangmenu:uitVoertuigHalen', function()
 
                 if targetId ~= -10 then
                     print("sent2")
-                    TriggerServerEvent('jaga-gangmenu:server:TakePlayerOutOfVehicle', targetId, veh)
+                    TriggerServerEvent('jaga-gangmenu:server:TakePlayerOutOfVehicle', targetId, netId)
                     --TaskWarpPedIntoVehicle(PlayerPedId(), veh, seatToPutIn+1)
                 else 
                     print("no player near you!")
@@ -344,12 +345,11 @@ AddEventHandler('jaga-gangmenu:uitVoertuigHalen', function()
 end)
 
 RegisterNetEvent('jaga-gangmenu:client:uitVoertuigGehaald')
-AddEventHandler('jaga-gangmenu:client:uitVoertuigGehaald', function(veh)
+AddEventHandler('jaga-gangmenu:client:uitVoertuigGehaald', function(playerId, netId)
 
-    -- logic here
-    print("groetjes van John Atlas1")
-    TaskLeaveVehicle(PlayerPedId(), veh, 16)
-    print("groetjes van John Atlas2")
+    local vehicle = NetToVeh(netId)
+
+    TaskLeaveVehicle(PlayerPedId(), vehicle, 16)
 
 end)
 
@@ -552,14 +552,15 @@ lib.registerMenu({
         print("frisk event")
         TriggerEvent('police:client:SearchPlayer')
     --in auto steken
+    --elseif selected == 3 then 
+    --    print("car in event")
+    --    TriggerEvent('jaga-gangmenu:inVoertuigSteken')
+    --    --TriggerEvent('wasabi_police:inVehiclePlayer')
+    ---- uit auto halen
+    --elseif selected == 4 then 
+    --    TriggerEvent('jaga-gangmenu:uitVoertuigHalen')
+    ---- mee slepen
     elseif selected == 3 then 
-        print("car in event")
-        TriggerEvent('jaga-gangmenu:inVoertuigSteken')
-    -- uit auto halen
-    elseif selected == 4 then 
-        TriggerEvent('jaga-gangmenu:uitVoertuigHalen')
-    -- mee slepen
-    elseif selected == 5 then 
         TriggerEvent('jaga-gangmenu:kleedkamer')
     end
 end)

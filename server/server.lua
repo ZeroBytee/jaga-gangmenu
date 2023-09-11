@@ -14,7 +14,7 @@ local function IsPlayerCuffed(playerPedId)
 end
 
 
-RegisterNetEvent('jaga-gangmenu:server:PutPlayerInVehicle', function(playerId, veh, freeSeat)
+RegisterNetEvent('jaga-gangmenu:server:PutPlayerInVehicle', function(playerId, netId, freeSeat)
     local src = source
     local playerPed = GetPlayerPed(src)
     local targetPed = GetPlayerPed(playerId)
@@ -25,12 +25,12 @@ RegisterNetEvent('jaga-gangmenu:server:PutPlayerInVehicle', function(playerId, v
     --local EscortPlayer = QBCore.Functions.GetPlayer(playerId)
     if not QBCore.Functions.GetPlayer(src) then return end
     print("event received")
-    TriggerClientEvent("jaga-gangmenu:client:inVoertuigGestoken", playerId, veh, freeSeat)
+    TriggerClientEvent("jaga-gangmenu:client:inVoertuigGestoken", playerId, playerId, netId, freeSeat)
     
     --TaskWarpPedIntoVehicle(playerPed, veh, -1)
 end)
 
-RegisterNetEvent('jaga-gangmenu:server:TakePlayerOutOfVehicle', function(playerId, veh)
+RegisterNetEvent('jaga-gangmenu:server:TakePlayerOutOfVehicle', function(playerId, netId)
     local src = source
     local playerPed = GetPlayerPed(src)
     local targetPed = GetPlayerPed(playerId)
@@ -41,7 +41,7 @@ RegisterNetEvent('jaga-gangmenu:server:TakePlayerOutOfVehicle', function(playerI
     --local EscortPlayer = QBCore.Functions.GetPlayer(playerId)
     if not QBCore.Functions.GetPlayer(src) then return end
     print("event received2")
-    TriggerClientEvent("jaga-gangmenu:client:uitVoertuigGehaald", playerId, veh)
+    TriggerClientEvent("jaga-gangmenu:client:uitVoertuigGehaald", playerId, playerId, netId)
     print("sent")
     
     --TaskWarpPedIntoVehicle(playerPed, veh, -1)
